@@ -26,7 +26,7 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter{
     public static final String AUTHENTICATION_HEADER_NAME = "Authorization";
-    public static final String AUTHENTICATION_URL = "/api/auth/loginn";
+    public static final String AUTHENTICATION_URL = "/api/login";
     public static final String REFRESH_TOKEN_URL = "/api/auth/token";
     public static final String API_ROOT_URL = "/api/**";
 
@@ -45,27 +45,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
     }
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-//        http.cors().disable();
         http.csrf().disable()
                 .exceptionHandling().authenticationEntryPoint(customAuthenticationEntryPoint)
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .authorizeRequests().antMatchers(Arrays.toString(AUTH_WHITELIST)).permitAll()
-                .and()
-                .authorizeRequests().antMatchers("/api/auth/login").permitAll()
-//                .and()
-//                .authorizeRequests().antMatchers(API_ROOT_URL).authenticated()
+                .authorizeRequests()
+                .antMatchers(Arrays.toString(AUTH_WHITELIST)).permitAll()
+                .antMatchers(API_ROOT_URL).authenticated()
                 .and()
                 .addFilterBefore(new CustomCorsFilter(),UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(buildLoginFilter(AUTHENTICATION_URL),UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(buildJwtFilter(Arrays.asList(AUTH_WHITELIST),
                         API_ROOT_URL), UsernamePasswordAuthenticationFilter.class);
-//                .addFilterBefore(buildAjaxLoginProcessingFilter(AUTHENTICATION_URL), UsernamePasswordAuthenticationFilter.class)
-//                .addFilterBefore(buildJwtTokenAuthenticationProcessingFilter(permitAllEndpointList,
-//                        API_ROOT_URL), UsernamePasswordAuthenticationFilter.class);
-
-
     }
 
     protected LoginFilter buildLoginFilter(String loginEntryPoint) {
@@ -83,7 +75,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
     private static final String[] AUTH_WHITELIST = {
             // -- swagger ui
             "/v2/api-docs",
-            "/api/auth/loginn/api/test",
+            "/login",
             "/swagger-resources",
             "/swagger-resources/**",
             "/configuration/ui",
